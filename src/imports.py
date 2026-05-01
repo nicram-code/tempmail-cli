@@ -3,9 +3,15 @@ import sys
 import json
 import re
 import time
+import colorama
+from colorama import Fore, Style
 import datetime
 import pathlib
 import argparse
+import webbrowser
+import socket
+import random
+import string  
 import subprocess
 import platform
 import shutil
