@@ -1,7 +1,7 @@
-#!/bin/bash
+
 set -e
 
-# Colors
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -49,7 +49,7 @@ setup_venv() {
     fi
 }
 
-# ← TUTAJ, poza main()
+
 check_venv() {
     if [[ "$OS" == "linux" || "$OS" == "macos" ]]; then
         if [[ -z "$VIRTUAL_ENV" ]]; then
@@ -94,7 +94,7 @@ main() {
     detect_os
     check_python
     setup_venv
-    check_venv       # ← wywołanie
+    check_venv      
     activate_venv
     install_requirements
 
