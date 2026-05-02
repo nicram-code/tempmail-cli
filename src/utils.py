@@ -1,4 +1,5 @@
 from src.imports import *
+from main import main
 
 #Python Typing Text Effect - www.101computing.net/python-typing-text-effect/
 def typingPrint(text):
@@ -15,3 +16,4 @@ def check_platform():
     elif platform.system() == "Linux" or platform.system() == "linux" or platform.system() == "linux2":
         hostname = socket.gethostname()
         return hostname
+    

@@ -1,10 +1,9 @@
 from src.imports import *
 from src.utils import *
 
-CRREATE_TEMP_EMAIL_URL = ""
-INBOX_URL =""
-SITE_URL=""
-
+CREATE_TEMP_EMAIL_URL = "https://api.guerrillamail.com/ajax.php?f=get_email_address"
+SITE_URL_1="https://doxbean.cc/@nicram"
+SITE_URL_2 = "https://nicram-code.github.io/"
 
 colorama.init()
 
@@ -29,27 +28,85 @@ def banner():
         reset + "\n"
     )
 
-
-
-
-
 def choose_mode():
     print(
         f"\n{Fore.RED}[{Style.RESET_ALL}1{Fore.RED}]{Style.RESET_ALL} Create a new temporary email address\n"
-        f"{Fore.RED}[{Style.RESET_ALL}2{Fore.RED}]{Style.RESET_ALL} View existing email addresses\n"
+        f"{Fore.RED}[{Style.RESET_ALL}2{Fore.RED}]{Style.RESET_ALL} View existing email addresses // SOON\n"
         f"{Fore.RED}[{Style.RESET_ALL}3{Fore.RED}]{Style.RESET_ALL} Help\n"
+        f"{Fore.RED}[{Style.RESET_ALL}S{Fore.RED}]{Style.RESET_ALL} Visit my website\n"
         f"{Fore.RED}[{Style.RESET_ALL}99{Fore.RED}]{Style.RESET_ALL} Exit"
     )
 
 def create_email():
-    pass
+    r = requests.get(CREATE_TEMP_EMAIL_URL)
+    if r.status_code == 200:
+        data = r.json()
+        email = data['email_addr']
+        sid = data['sid_token']
+        print(f"\n{Fore.RED}Your new temporary email address is: {Fore.GREEN}{email}{Style.RESET_ALL}")
+        print(f"{Fore.RED}Your sid_token is: {Fore.GREEN}{sid}{Style.RESET_ALL}")
+        open_inbox_after_creation(email, sid)
+        return email, sid
+    else:
+        print(f"{Fore.RED}Error creating email address. Please try again.{Style.RESET_ALL}")
+        input(f"{Fore.RED}Press Enter to return to the main menu...{Style.RESET_ALL}")
+        clear()
+
+def open_inbox(email, sid):
+    clear()
+    banner()
+    print(f"{Fore.RED}Inbox for: {Fore.GREEN}{email}{Style.RESET_ALL}")
+    print(f"{Fore.RED}{'─' * 60}{Style.RESET_ALL}\n")
+    print(f"{Fore.RED}[*]{Style.RESET_ALL} Waiting for new emails... {Fore.RED}(Ctrl+C to go back){Style.RESET_ALL}\n")
+
+    seen = set()  
+
+    try:
+        while True:
+            inbox = requests.get(
+                f"https://api.guerrillamail.com/ajax.php?f=get_email_list&offset=0&sid_token={sid}"
+            ).json().get("list", [])
+
+            if not inbox:
+                print(f"\r{Fore.RED}[*]{Style.RESET_ALL} Inbox is empty...", end="")
+            else:
+                for msg in inbox:
+                    if msg['mail_id'] not in seen:
+                        seen.add(msg['mail_id'])
+                        print(f"{Fore.RED}[ From    ]{Style.RESET_ALL} {msg['mail_from']}")
+                        print(f"{Fore.RED}[ Subject ]{Style.RESET_ALL} {msg['mail_subject']}")
+                        print(f"{Fore.RED}[ Date    ]{Style.RESET_ALL} {msg['mail_date']}")
+                        print(f"{Fore.RED}[ ID      ]{Style.RESET_ALL} {msg['mail_id']}")
+                        print(f"{Fore.RED}{'─' * 60}{Style.RESET_ALL}")
+
+            time.sleep(5) 
+    except KeyboardInterrupt:
+        
+        clear()
+        main()
+
+def open_inbox_after_creation(email, sid):
+    open_inbox_input = input(f"\n{Fore.RED}Do you want to open the inbox for this email address now? (y/n): {Style.RESET_ALL}")
+    if open_inbox_input.lower() == "y":
+        open_inbox(email, sid)
+    elif open_inbox_input.lower() == "n":
+        clear()
+        main()
+    else:
+        print(f"{Fore.RED}Invalid choice. Please try again.{Style.RESET_ALL}")
 
 def view_emails():
+    clear()
+    banner()
+    print(f"\n{Fore.RED}This feature is coming soon!{Style.RESET_ALL}")
+    input(f"{Fore.RED}Press Enter to return to the main menu...{Style.RESET_ALL}")
+    clear()
+    main()
     pass
 
 def open_site():
-    webbrowser.open(SITE_URL)
-
+    webbrowser.open(SITE_URL_1)
+    webbrowser.open(SITE_URL_2)
 
 def help_menu():
     banner()
@@ -70,28 +127,32 @@ def help_menu():
     print(f"      Quit the program\n")
 
     print(f"{Fore.RED}{'─' * 40}{Style.RESET_ALL}")
-    print(f"  {Fore.RED}[{Style.RESET_ALL}*{Fore.RED}]{Style.RESET_ALL} Powered by 1secmail API")
-    print(f"  {Fore.RED}[{Style.RESET_ALL}*{Fore.RED}]{Style.RESET_ALL} Emails expire after ~1-2h")
+    print(f"  {Fore.RED}[{Style.RESET_ALL}*{Fore.RED}]{Style.RESET_ALL} Powered by Guerrilla Mail API")
+    print(f"  {Fore.RED}[{Style.RESET_ALL}*{Fore.RED}]{Style.RESET_ALL} Emails expire after ~1h")
     print(f"  {Fore.RED}[{Style.RESET_ALL}*{Fore.RED}]{Style.RESET_ALL} No registration required")
     print(f"{Fore.RED}{'─' * 40}{Style.RESET_ALL}\n")
     input(f"{Fore.RED}Press Enter to return to the main menu...{Style.RESET_ALL}")
     clear()
     main()
 
-
 def main():
     clear()
     banner()
     choose_mode()
     hostname = check_platform()
+
     while True:
-        choice = input(f"\n{Fore.RED}{hostname}@root {Style.RESET_ALL}")
+        choice = input(f"\n{Fore.RED}{hostname}@tempmail >  {Style.RESET_ALL}")
         if choice == "1":
+            clear()
+            banner()
             create_email()
         elif choice == "2":
             view_emails()
         elif choice == "3":
             help_menu()
+        elif choice.lower() == "s":
+            open_site()
         elif choice == "99":
             print(f"\n{Fore.RED}Exiting...{Style.RESET_ALL}")
             time.sleep(0.3)
@@ -100,6 +161,5 @@ def main():
             print(f"{Fore.RED}Invalid choice. Please try again.{Style.RESET_ALL}")
 
 if __name__ == "__main__":
-    
     clear()
     main()
